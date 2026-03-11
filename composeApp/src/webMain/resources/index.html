@@ -1,20 +1,143 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>geoeventosweb</title>
+    <title>GeoEventos Web</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Material Symbols (iconos para Compose/Skiko via canvas) -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <!-- App styles -->
     <link type="text/css" rel="stylesheet" href="styles.css">
+    <link type="favicon" rel="icon" href="svg/GE_icon_color.svg">
 </head>
-<body style="text-align: center; align-content: center">
-<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50" role="presentation">
-    <circle cx="25" cy="25" r="20" stroke="#ccc" stroke-width="4" fill="none"/>
-    <circle cx="25" cy="25" r="20" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"
-            stroke-dasharray="90 125">
-        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
-                          repeatCount="indefinite"/>
-    </circle>
-</svg>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     NAV BAR  (azul)
+════════════════════════════════════════════════ -->
+<nav id="app-nav">
+    <div id="nav-brand">
+        <img class="nav-logo" src="svg/GE_icon_color.svg">
+        <span class="nav-title">GeoEventos</span>
+    </div>
+    <div id="nav-links">
+        <a href="#" class="nav-link" id="link-docs">Documentación</a>
+        <span class="nav-separator">|</span>
+        <a href="#" class="nav-link" id="link-apps">Apps</a>
+        <span class="nav-separator">|</span>
+        <a href="#" class="nav-link" id="link-manual">Manual User</a>
+    </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN LAYOUT
+════════════════════════════════════════════════ -->
+<main id="app-main">
+
+    <!-- Panel izquierdo (rojo en mockup) → Compose monta aquí -->
+    <section id="events-panel">
+        <!-- Loading spinner mientras Compose inicializa -->
+        <div id="events-panel-loading" class="panel-loading">
+            <div class="spinner"></div>
+            <p>Cargando eventos…</p>
+        </div>
+        <!-- ComposeViewport (lista de eventos + detalle) se monta aquí -->
+        <div id="compose-panel" class="compose-mount"></div>
+    </section>
+
+    <!-- Panel derecho: mapa + búsqueda -->
+    <section id="map-section">
+
+        <!-- Barra de búsqueda (amarillo en mockup) → Compose monta aquí -->
+        <div id="search-bar-container">
+            <div id="compose-search" class="compose-mount"></div>
+        </div>
+
+        <!-- Mapa Leaflet (verde en mockup) -->
+        <div id="map"></div>
+
+    </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════ -->
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- Bridge global: expone funciones para que Kotlin/JS controle el mapa -->
+<script>
+    // ── Inicialización del mapa ───────────────────────────────────────
+    window.__geoMap = null;
+    window.__markers = {};
+
+    window.initMap = function(lat, lng, zoom) {
+        if (window.__geoMap) return;
+        var map = L.map('map').setView([lat, lng], zoom || 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19
+        }).addTo(map);
+        window.__geoMap = map;
+    };
+
+    // ── Manejo de marcadores ──────────────────────────────────────────
+    // Al hacer click en un pin, guardamos el id en window.__lastPinClick.
+    // Kotlin/WASM lo lee con polling via @JsFun — no se pasa callback WASM.
+    window.__lastPinClick = -1;
+
+    window.addMarker = function(id, lat, lng, title) {
+        if (!window.__geoMap) return;
+        var marker = L.marker([lat, lng])
+            .addTo(window.__geoMap)
+            .bindTooltip(title, { permanent: false, direction: 'top' });
+        marker.on('click', function() {
+            window.__lastPinClick = id;
+        });
+        window.__markers[id] = marker;
+    };
+
+    window.consumePinClick = function() {
+        var id = window.__lastPinClick;
+        window.__lastPinClick = -1;
+        return id;
+    };
+
+    window.removeMarker = function(id) {
+        var m = window.__markers[id];
+        if (m && window.__geoMap) {
+            window.__geoMap.removeLayer(m);
+            delete window.__markers[id];
+        }
+    };
+
+    window.clearMarkers = function() {
+        Object.values(window.__markers).forEach(function(m) {
+            if (window.__geoMap) window.__geoMap.removeLayer(m);
+        });
+        window.__markers = {};
+    };
+
+    window.flyToMarker = function(lat, lng) {
+        if (window.__geoMap) window.__geoMap.flyTo([lat, lng], 15);
+    };
+
+    // ── Oculta el spinner del panel cuando Compose esté listo ─────────
+    window.hidePanelLoading = function() {
+        var el = document.getElementById('events-panel-loading');
+        if (el) el.style.display = 'none';
+    };
+</script>
+
+<!-- Compose app bundle (generado por Kotlin/JS) -->
 <script type="application/javascript" src="composeApp.js"></script>
+
 </body>
 </html>

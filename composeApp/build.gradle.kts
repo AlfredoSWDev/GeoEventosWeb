@@ -1,17 +1,13 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
-    js {
-        browser()
-        binaries.executable()
-    }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
@@ -20,6 +16,7 @@ kotlin {
     }
 
     sourceSets {
+
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
@@ -29,11 +26,19 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.json)
+            implementation(libs.kotlinx.serialization.json)
         }
+
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
+        }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
     }
 }
-
-
