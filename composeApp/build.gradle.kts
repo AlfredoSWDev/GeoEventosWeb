@@ -5,7 +5,9 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.buildkonfig)
 }
+
 
 kotlin {
 
@@ -26,7 +28,6 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.json)
@@ -40,5 +41,20 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+buildkonfig {
+    packageName = "com.geoEventos"
+
+    defaultConfigs {
+        val props = rootProject.file(".env")
+            .takeIf { it.exists() }
+            ?.readLines()
+            ?.filter { it.contains("=") && !it.startsWith("#") }
+            ?.associate { it.substringBefore("=").trim() to it.substringAfter("=").trim() }
+            ?: emptyMap()
+
+        buildConfigField(com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING, "API_BASE_URL", props["API_BASE_URL"] ?: "http://localhost:8080")
     }
 }
