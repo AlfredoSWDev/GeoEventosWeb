@@ -1,129 +1,127 @@
-# GeoEventosWeb
+# GeoEventosWeb 🌐
 
-**Módulo de Web para GeoEventos**
+Frontend web del ecosistema **GeoEventos** — plataforma B2B de gestión de eventos con geolocalización.
 
-**Introducción**
-================
+Construido con **Kotlin Multiplatform + Compose for Web (Wasm)**, desplegado en GitHub Pages y conectado a una API REST en Render.
 
-Este proyecto es un módulo de web para GeoEventos, una plataforma de eventos geolocalizados. El objetivo es crear un cliente web para eventos, que permita a los usuarios explorar, crear, leer, actualizar y eliminar eventos.
+🔗 **[Ver app en producción](https://alfredoswdev.github.io/GeoEventosWeb/)**
 
-**Características**
-----------------
+---
 
-* Mapa interactivo con marcadores de eventos
-* Click en mapa para asignar ubicación a nuevo evento
-* CRUD completo de eventos (crear, leer, actualizar, borrar)
-* Búsqueda de eventos por nombre
-* Panel de gestión con Material Design 3
-* Compilación a WebAssembly para máximo rendimiento
-* Responsive design para desktop/tablet
+## Stack
 
-**Dependencias**
---------------
+| Capa | Tecnología |
+|------|-----------|
+| UI | Compose Multiplatform 1.10.0 (Wasm) |
+| HTTP | Ktor Client 3.1.3 |
+| Serialización | kotlinx.serialization 1.8.1 |
+| Mapa | Leaflet.js + OpenStreetMap |
+| Build | Gradle 9.3.1 + BuildKonfig 0.15.2 |
+| CI/CD | GitHub Actions → GitHub Pages |
+| API | Spring Boot (GeoEventosAPI en Render) |
 
-* Compose Runtime & UI
-* Ktor Client
-* Kotlinx.serialization
-* Material 3
-* Lifecycle
+---
 
-**Requisitos**
-------------
+## Arquitectura
 
-* Java Development Kit (JDK) 23+
-* Git (para clonar/versionar)
-* Navegador moderno con soporte WebAssembly:
-  - Chrome 74+
-  - Firefox 79+
-  - Safari 14.1+
-  - Edge 79+
-
-**Cómo levantar el proyecto**
----------------------------
-
-### 1️⃣ Levantar la API (requerida)
-
-La aplicación web consume datos de GeoEventosAPI. Debes tenerla corriendo primero.
-
-```bash
-# En otra terminal
-cd ../GeoEventosAPI
-./gradlew bootRun
+```
+GeoEventosWeb/
+├── composeApp/
+│   └── src/
+│       └── webMain/kotlin/
+│           ├── api/          # ApiClient (Ktor)
+│           ├── map/          # MapBridge (JS interop con Leaflet)
+│           ├── model/        # Evento, EventoDTO, ImagenResponse
+│           ├── ui/           # PanelEventos, SearchBar, ViewModel
+│           │   └── theme/    # Material 3 (light/dark)
+│           └── main.kt       # ComposeViewport entry point
+├── .env                      # Variables locales (no se commitea)
+├── .env.example              # Plantilla de variables
+└── .github/workflows/
+    └── deploy.yml            # Build + deploy automático
 ```
 
-### 2️⃣ Ejecutar GeoEventos Web en desarrollo (Wasm - Recomendado)
+**Comunicación Kotlin/Wasm ↔ JS:** El mapa Leaflet corre en JS puro. Kotlin se comunica via `@JsFun` — los clicks en pines se leen con polling desde `window.__lastPinClick` porque WASM no puede pasar lambdas a JS directamente.
+
+---
+
+## Variables de entorno
+
+El proyecto usa **BuildKonfig** para inyectar variables del `.env` en tiempo de build.
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+API_BASE_URL=https://tu-api.onrender.com
+```
+
+Las variables quedan disponibles en Kotlin como:
+
+```kotlin
+import com.geoEventos.BuildKonfig
+
+val url = BuildKonfig.API_BASE_URL
+```
+
+Para producción (GitHub Actions), configura el secret `API_BASE_URL` en:
+**Settings → Secrets and variables → Actions**
+
+---
+
+## Correr localmente
 
 ```bash
+# Clonar
+git clone git@github.com:AlfredoSWDev/GeoEventosWeb.git
 cd GeoEventosWeb
-./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+
+# Crear .env
+echo "API_BASE_URL=http://localhost:8080" > .env
+
+# Dev server con hot reload
+./gradlew wasmJsBrowserDevelopmentRun
 ```
 
-La aplicación se abrirá automáticamente en `http://localhost:8080`.
+La app abre en `http://localhost:8080`.
 
-**Cómo compilar para producción**
---------------------------------
+---
 
-### Compilación Wasm (Recomendada)
+## Build de producción
 
 ```bash
-./gradlew :composeApp:wasmJsBrowserDistribution
+./gradlew composeApp:wasmJsBrowserDistribution
 ```
 
-Salida: `composeApp/build/dist/wasmJs/productionExecutable/`
-
-**Troubleshooting**
---------------------
-
-### La aplicación no inicia
-
-Verifica que GeoEventosAPI está corriendo:
-
-```bash
-# En otra terminal
-cd ../GeoEventosAPI
-./gradlew bootRun
+Los archivos se generan en:
+```
+composeApp/build/dist/wasmJs/productionExecutable/
 ```
 
-### WebAssembly no se compila
+---
 
-Asegúrate de tener JDK 23+:
+## Deploy
 
-```bash
-java -version
-```
+Cada push a `main` dispara el workflow de GitHub Actions que:
 
-Si sigue fallando, usa el target JavaScript:
+1. Crea el `.env` desde el secret `API_BASE_URL`
+2. Ejecuta `wasmJsBrowserDistribution`
+3. Publica en la rama `gh-pages`
 
-```bash
-./gradlew :composeApp:jsBrowserDevelopmentRun
-```
+---
 
-**Repositorios relacionados**
----------------------------
+## Parte del ecosistema GeoEventos
 
-| Proyecto | Tecnología | Rol |
-|----------|-----------|-----|
-| [GeoEventos](https://github.com/AlfredoSWDev/GeoEventos) | Monorepo | Coordinador principal |
-| [GeoEventosAPI](https://github.com/AlfredoSWDev/GeoEventosAPI) | Spring Boot | Backend REST |
-| [GeoEventosGUI](https://github.com/AlfredoSWDev/GeoEventosGUI) | Java Swing | Cliente desktop |
-| [GeoEventosAndroid](https://github.com/AlfredoSWDev/GeoEventosAndroid) | Kotlin Compose | App móvil |
-| **GeoEventosWeb** (este) | Kotlin/Wasm | Cliente web |
+| Repositorio | Descripción |
+|-------------|-------------|
+| [GeoEventosAPI](https://github.com/AlfredoSWDev/GeoEventosAPI) | Spring Boot 4 + PostgreSQL |
+| [GeoEventosAndroid](https://github.com/AlfredoSWDev/GeoEventosAndroid) | Kotlin + Jetpack Compose + OSMDroid |
+| [GeoEventosGUI](https://github.com/AlfredoSWDev/GeoEventosGUI) | Java + Swing + JavaFX |
+| **GeoEventosWeb** | Kotlin/Wasm + Compose for Web ← estás aquí |
 
-**Roadmap**
-----------
+---
 
-* [ ] Autenticación JWT con GeoEventosAPI
-* [ ] Filtros por categoría, fecha y proximidad
-* [ ] Notificaciones en tiempo real (WebSocket)
-* [ ] Estadísticas y análisis de eventos
-* [ ] Integración PWA (instalable en home)
-* [ ] Modo offline con sincronización
-* [ ] Despliegue en Vercel / AWS
+## Autor
 
-**Desarrollado por**
--------------------
+**Alfredo** — [@AlfredoSWDev](https://github.com/AlfredoSWDev)
 
-**Alfredo** — [github.com/AlfredoSWDev](https://github.com/AlfredoSWDev)
-
-**Última actualización:** Marzo 2026
-
+📺 Stream de desarrollo en [Twitch](https://twitch.tv/AlfredoSWDev) · [YouTube](https://youtube.com/@AlfredoSWDev)
