@@ -115,7 +115,7 @@ Cada push a `main` dispara el workflow de GitHub Actions que:
 |-------------|-------------|
 | [GeoEventosAPI](https://github.com/AlfredoSWDev/GeoEventosAPI) | Spring Boot 4 + PostgreSQL |
 | [GeoEventosAndroid](https://github.com/AlfredoSWDev/GeoEventosAndroid) | Kotlin + Jetpack Compose + OSMDroid |
-| [GeoEventosGUI](https://github.com/AlfredoSWDev/GeoEventosGUI) | Java + Swing + JavaFX |
+| [GeoEventosDesktop](https://github.com/AlfredoSWDev/GeoEventosDesktop) | Java + Swing + JavaFX |
 | **GeoEventosWeb** | Kotlin/Wasm + Compose for Web ← estás aquí |
 
 ---
