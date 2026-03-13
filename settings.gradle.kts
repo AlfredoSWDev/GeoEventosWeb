@@ -1,4 +1,4 @@
-rootProject.name = "geoeventosweb"
+rootProject.name = "GeoEventosWeb"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

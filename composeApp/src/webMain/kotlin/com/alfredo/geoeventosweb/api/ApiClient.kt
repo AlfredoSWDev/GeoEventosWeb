@@ -3,6 +3,7 @@ package com.alfredo.geoeventosweb.api
 import com.alfredo.geoeventosweb.model.Evento
 import com.alfredo.geoeventosweb.model.EventoDTO
 import com.alfredo.geoeventosweb.model.ImagenResponse
+import com.geoEventos.BuildKonfig.API_BASE_URL
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -15,7 +16,8 @@ import kotlinx.serialization.json.Json
 object ApiClient {
 
     // Cambia esta URL si tu API corre en otro puerto
-    private const val BASE_URL = "http://localhost:8080"
+    private val BASE_URL = API_BASE_URL
+
 
     private val json = Json {
         ignoreUnknownKeys = true

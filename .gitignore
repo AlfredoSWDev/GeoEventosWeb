@@ -19,3 +19,4 @@ captures
 node_modules/
 contextgenerator.sh
 kmp_context.txt
+.env
