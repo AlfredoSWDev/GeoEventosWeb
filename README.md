@@ -2,7 +2,7 @@
 
 Frontend web del ecosistema **GeoEventos** — plataforma B2B de gestión de eventos con geolocalización.
 
-Construido con **Kotlin Multiplatform + Compose for Web (Wasm)**, desplegado en GitHub Pages y conectado a una API REST en Render.
+Construido con **Kotlin Multiplatform + Compose for Web (Wasm)**, desplegado en GitHub Pages y conectado a la API REST en Render.
 
 🔗 **[Ver app en producción](https://alfredoswdev.github.io/GeoEventosWeb/)**
 
@@ -18,7 +18,7 @@ Construido con **Kotlin Multiplatform + Compose for Web (Wasm)**, desplegado en 
 | Mapa | Leaflet.js + OpenStreetMap |
 | Build | Gradle 9.3.1 + BuildKonfig 0.15.2 |
 | CI/CD | GitHub Actions → GitHub Pages |
-| API | Spring Boot (GeoEventosAPI en Render) |
+| API | GeoEventosAPI en Render |
 
 ---
 
@@ -52,7 +52,7 @@ El proyecto usa **BuildKonfig** para inyectar variables del `.env` en tiempo de 
 Crea un archivo `.env` en la raíz del proyecto:
 
 ```env
-API_BASE_URL=https://tu-api.onrender.com
+API_BASE_URL=https://geoeventosapi.onrender.com
 ```
 
 Las variables quedan disponibles en Kotlin como:
@@ -75,7 +75,7 @@ Para producción (GitHub Actions), configura el secret `API_BASE_URL` en:
 git clone git@github.com:AlfredoSWDev/GeoEventosWeb.git
 cd GeoEventosWeb
 
-# Crear .env
+# Crear .env apuntando a la API local
 echo "API_BASE_URL=http://localhost:8080" > .env
 
 # Dev server con hot reload
@@ -109,19 +109,33 @@ Cada push a `main` dispara el workflow de GitHub Actions que:
 
 ---
 
+## Roadmap
+
+- [x] Listar y visualizar eventos
+- [x] Crear y eliminar eventos desde la UI
+- [x] Mapa con Leaflet/OpenStreetMap
+- [x] CI/CD con GitHub Actions → GitHub Pages
+- [x] Conectado a API en producción (Render)
+- [ ] Edición de eventos desde la UI
+- [ ] Búsqueda y filtrado de eventos
+- [ ] Autenticación de usuarios
+
+---
+
 ## Parte del ecosistema GeoEventos
 
 | Repositorio | Descripción |
 |-------------|-------------|
-| [GeoEventosAPI](https://github.com/AlfredoSWDev/GeoEventosAPI) | Spring Boot 4 + PostgreSQL |
-| [GeoEventosAndroid](https://github.com/AlfredoSWDev/GeoEventosAndroid) | Kotlin + Jetpack Compose + OSMDroid |
-| [GeoEventosDesktop](https://github.com/AlfredoSWDev/GeoEventosDesktop) | Java + Swing + JavaFX |
+| [GeoEventosAPI](https://github.com/AlfredoSWDev/GeoEventosAPI) | Spring Boot 4 + Java 21 + PostgreSQL |
 | **GeoEventosWeb** | Kotlin/Wasm + Compose for Web ← estás aquí |
+| [GeoEventosAndroid](https://github.com/AlfredoSWDev/GeoEventosAndroid) | Kotlin + Jetpack Compose + OSMDroid |
+| [GeoEventosDesktop](https://github.com/AlfredoSWDev/GeoEventosDesktop) | Java 23 + Swing + JavaFX |
+| [GeoEventosDB](https://github.com/AlfredoSWDev/GeoEventosDB) | Schema y migraciones PostgreSQL |
 
 ---
 
 ## Autor
 
-**Alfredo** — [@AlfredoSWDev](https://github.com/AlfredoSWDev)
+**Alfredo Sanchez** — [@AlfredoSWDev](https://github.com/AlfredoSWDev)
 
 📺 Stream de desarrollo en [Twitch](https://twitch.tv/AlfredoSWDev) · [YouTube](https://youtube.com/@AlfredoSWDev)
